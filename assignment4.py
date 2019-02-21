@@ -174,9 +174,10 @@ client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
 client.subscribe([("traffic/direction", 0), ("traffic/lights", 0), ("traffic/status", 0)])
 
 client.on_message = on_message
-client.loop_start()git stat
+client.loop_start()
 for i in range (0,5):
 		time.sleep(1)
+count = 0
 while True:
 	if not queueE.empty() or not queueW.empty() and GPIO.input(ns_green) == True:
 		switch_lights()
@@ -199,6 +200,14 @@ while True:
 		print("Switch Lights")
 		
 		switch_lights()
+	
+	time.sleep(.1)
+	count+=1
+	if count % 10 == 0:
+		if not queueN.empty():
+			queueN.get()
+		if not queueS.empty():
+			queueS.get()
 
 GPIO.cleanup()
 client.disconnect()
