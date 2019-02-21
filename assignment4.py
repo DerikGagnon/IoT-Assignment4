@@ -203,7 +203,7 @@ while True:
 	
 	time.sleep(.1)
 	count+=1
-	if count % 10 == 0:
+	if count % 8 == 0:
 		if not queueN.empty():
 			queueN.get()
 		if not queueS.empty():
