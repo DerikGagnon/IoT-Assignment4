@@ -134,24 +134,45 @@ GPIO.output(ew_red, True)
 usLight.put("USA")
 
 def on_message(client, userdata, message):
-	print("Message Received: ", str(message.payload))
-	if str(message.payload) == "n":
-		queueN.put(str(message.payload))
-	elif str(message.payload) == "s":
-		queueS.put(str(message.payload))
-	elif str(message.payload) == "e":
-		queueE.put(str(message.payload))
-	elif str(message.payload) == "w":
-		queueW.put(str(message.payload))
-	elif str(message.payload) == "us":
-		usLight.put("USA")
-	elif str(message.payload) == "uk":
-		while not usLight.empty():
-			usLight.get()
+	print("Message Topic: ", message.topic)
+	print("Message Payload: ", str(message.payload))
+	if message.topic == "traffic/direction":
+		if str(message.payload) == "n":
+			queueN.put(str(message.payload))
+		elif str(message.payload) == "s":
+			queueS.put(str(message.payload))
+		elif str(message.payload) == "e":
+			queueE.put(str(message.payload))
+		elif str(message.payload) == "w":
+			queueW.put(str(message.payload))
+	elif message.topic == "traffic/lights":
+		if str(message.payload) == "us":
+			usLight.put("USA")
+		elif str(message.payload) == "uk":
+			while not usLight.empty():
+				usLight.get()
+	elif message.topic == "traffic/status":
+		if str(message.payload) == "status":
+			# Send message to publisher
+			print(str(queueE.qsize()), " cars waiting from the East")
+			print(str(queueW.qsize()), " cars waiting from the West")
+			print(str(queueN.qsize()), " cars waiting from the North")
+			print(str(queueS.qsize()), " cars waiting from the South")
+			if GPIO.input(ns_green) == True:
+				print("Green light for North/South")
+				print("Red light for East/West")
+			else:
+				print("Green light for East/West")
+				print("Red light for North/South")
+			if usLight.empty():
+				print("Light Style: UK")
+			else:
+				print("Light Style: US")
 
 client = mqtt.Client(client_id="Server")
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
-client.subscribe("traffic", qos=0)
+client.subscribe("traffic/direction", qos=0)
+# [("my/topic", 0), ("another/topic", 2)]
 
 client.on_message = on_message
 client.loop_start()

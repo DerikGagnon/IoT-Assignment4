@@ -7,29 +7,39 @@ client = mqtt.Client(client_id="Client")
 
 # Connect to the Broker
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
+menu = "n"
 
-input = raw_input("What direction is a car coming from? ")
+while menu.lower() != "q":
+	print("A - Send a car")
+	print("B - Change Lights")
+	print("C - Status Request")
+	print("Q - Quit\n")
+	menu = raw_input("What would you like to do: ")
+	if menu.lower() == "a":
+		direction = raw_input("What direction is the car coming from: ")
+		if direction.lower() == "n":
+			# Send message to Broker
+			client.publish("traffic/direction", "n", qos=0, retain=False)
+		elif direction.lower() == "s":
+			# Send message to Broker
+			client.publish("traffic/direction", "s", qos=0, retain=False)
+		elif direction.lower() == "e":
+			# Send message to Broker
+			client.publish("traffic/direction", "e", qos=0, retain=False)
+		elif direction.lower() == "w":
+			# Send message to Broker
+			client.publish("traffic/direction", "w", qos=0, retain=False)
+	elif menu.lower() == "b":
+		style = raw_input("What style would you like the lights (US/UK): ")
+		if style.lower() == "us":
+			# Send message to Broker
+			client.publish("traffic/lights", "us", qos=0, retain=False)
+		elif style.lower() == "uk":
+			# Send message to Broker
+			client.publish("traffic/lights", "uk", qos=0, retain=False)
+	elif menu.lower() == "c":
+		client.publish("traffic/status", "status", qos=0, retain=False)
 
-while input.lower() != "q":
-	if input.lower() == "n":
-		# Send message to Broker
-		client.publish("traffic", "n", qos=0, retain=False)
-	elif input.lower() == "s":
-		# Send message to Broker
-		client.publish("traffic", "s", qos=0, retain=False)
-	elif input.lower() == "e":
-		# Send message to Broker
-		client.publish("traffic", "e", qos=0, retain=False)
-	elif input.lower() == "w":
-		# Send message to Broker
-		client.publish("traffic", "w", qos=0, retain=False)
-	elif input.lower() == "us":
-		# Send message to Broker
-		client.publish("traffic", "us", qos=0, retain=False)
-	elif input.lower() == "uk":
-		# Send message to Broker
-		client.publish("traffic", "uk", qos=0, retain=False)
-	input = raw_input("What direction is a car coming from? ")
 
 # client = mqtt.Client(client_id="Derik")
 # client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
