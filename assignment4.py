@@ -170,6 +170,7 @@ def on_message(client, userdata, message):
 				print("Light Style: US")
 
 client = mqtt.Client(client_id="Server")
+client.username_pw_set("traffic", password="lights")
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
 client.subscribe([("traffic/direction", 0), ("traffic/lights", 0), ("traffic/status", 0)])
 
