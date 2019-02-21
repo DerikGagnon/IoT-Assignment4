@@ -171,11 +171,10 @@ def on_message(client, userdata, message):
 
 client = mqtt.Client(client_id="Server")
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
-client.subscribe("traffic/direction", qos=0)
-# [("my/topic", 0), ("another/topic", 2)]
+client.subscribe([("traffic/direction", 0), ("traffic/lights", 0), ("traffic/status", 0)])
 
 client.on_message = on_message
-client.loop_start()
+client.loop_start()git stat
 for i in range (0,5):
 		time.sleep(1)
 while True:
