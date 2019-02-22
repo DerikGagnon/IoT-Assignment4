@@ -2,12 +2,20 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import time
 
+def on_connect(client, userdata, flags, rc):
+	if rc == 5:
+		print("\nInvalid username or password.\n")
+	elif rc == 0:
+		print("Welcome to the Traffic Lights Server")
+
 def on_message(client, userdata, message):
 	print("\n" + str(message.payload))
 
 # Setup the client
 client = mqtt.Client(client_id="Client")
+client.username_pw_set(username="traffic", password="lights")
 client.on_message = on_message
+client.on_connect = on_connect
 
 # Connect to the Broker
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")

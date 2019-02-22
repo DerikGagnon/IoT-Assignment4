@@ -61,8 +61,6 @@ def switch_lights():
 			GPIO.output(ew_red, False)
 			GPIO.output(ew_green, True)
 			for i in range(0,2):
-				#print(str(queueE.qsize()) + " cars in queueE - Switch Lights")
-				#print(str(queueW.qsize()) + " cars in queueW - Switch Lights")
 				time.sleep(1)
 				
 				if not queueE.empty():
@@ -100,8 +98,6 @@ def switch_lights():
 			GPIO.output(ew_yellow, False)
 			GPIO.output(ew_green, True)
 			for i in range(0,2):
-				#print(str(queueE.qsize()) + " cars in queueE - Switch Lights")
-				#print(str(queueW.qsize()) + " cars in queueW - Switch Lights")
 				time.sleep(1)
 				
 				if not queueE.empty():
@@ -133,6 +129,12 @@ GPIO.output(ns_green, True)
 GPIO.output(ew_red, True)
 usLight.put("USA")
 
+def on_connect(client, userdata, flags, rc):
+	if rc == 5:
+		print("\nInvalid username or password.\n")
+	elif rc == 0:
+		print("Welcome to the Traffic Lights Server")
+
 def on_message(client, userdata, message):
 	print("Message Topic: " + str(message.topic))
 	print("Message Payload: " + str(message.payload))
@@ -157,7 +159,7 @@ def on_message(client, userdata, message):
 			returnString = str(queueE.qsize()) + " cars waiting from the East\n"
 			returnString = returnString + str(queueW.qsize()) + " cars waiting from the West\n"
 			returnString = returnString + str(queueN.qsize()) + " cars waiting from the North\n"
-			returnString = returnString + str(queueS.qsize()) + " cars waiting from the South\n"
+			returnString = returnString + str(queueS.qsize()) + " cars waiting from the South\n\n"
 			if GPIO.input(ns_green) == True:
 				returnString = returnString + "Green light for North/South\n"
 				returnString = returnString + "Red light for East/West\n"
@@ -165,13 +167,14 @@ def on_message(client, userdata, message):
 				returnString = returnString + "Green light for East/West\n"
 				returnString = returnString + "Red light for North/South\n"
 			if usLight.empty():
-				returnString = returnString + "Light Style: UK\n"
+				returnString = returnString + "\nLight Style: UK\n"
 			else:
-				returnString = returnString + "Light Style: US\n"
+				returnString = returnString + "\nLight Style: US\n"
 			client.publish("traffic/reply", returnString, qos=0, retain=False)
 
 client = mqtt.Client(client_id="Server")
 client.username_pw_set("traffic", password="lights")
+client.on_connect = on_connect
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
 client.subscribe([("traffic/direction", 0), ("traffic/lights", 0), ("traffic/status", 0)])
 
@@ -184,22 +187,18 @@ while True:
 	if not queueE.empty() or not queueW.empty() and GPIO.input(ns_green) == True:
 		switch_lights()
 	elif queueE.empty() and queueW.empty() and GPIO.input(ew_green) == True:
-		print("Switch Lights")
+		#print("Switch Lights")
 		switch_lights()
 	elif not queueE.empty() or not queueW.empty() and GPIO.input(ew_green) == True:
 		timer2 = 0
 		while not queueE.empty() or not queueW.empty() and timer2 != 3:
-			#print(str(queueE.qsize()) + " cars in queueE")
-			#print(str(queueW.qsize()) + " cars in queueW")
 			if not queueE.empty():
 				queueE.get()
 			if not queueW.empty():
 				queueW.get() 
 			time.sleep(1)
 			timer2 += 1
-		#print(str(queueE.qsize()) + " cars in queueE")
-		#print(str(queueW.qsize()) + " cars in queueW")
-		print("Switch Lights")
+		#print("Switch Lights")
 		
 		switch_lights()
 	
