@@ -61,8 +61,8 @@ def switch_lights():
 			GPIO.output(ew_red, False)
 			GPIO.output(ew_green, True)
 			for i in range(0,2):
-				print(str(queueE.qsize()), " cars in queueE - Switch Lights")
-				print(str(queueW.qsize()), " cars in queueW - Switch Lights")
+				#print(str(queueE.qsize()) + " cars in queueE - Switch Lights")
+				#print(str(queueW.qsize()) + " cars in queueW - Switch Lights")
 				time.sleep(1)
 				
 				if not queueE.empty():
@@ -100,8 +100,8 @@ def switch_lights():
 			GPIO.output(ew_yellow, False)
 			GPIO.output(ew_green, True)
 			for i in range(0,2):
-				print(str(queueE.qsize()), " cars in queueE - Switch Lights")
-				print(str(queueW.qsize()), " cars in queueW - Switch Lights")
+				#print(str(queueE.qsize()) + " cars in queueE - Switch Lights")
+				#print(str(queueW.qsize()) + " cars in queueW - Switch Lights")
 				time.sleep(1)
 				
 				if not queueE.empty():
@@ -134,9 +134,9 @@ GPIO.output(ew_red, True)
 usLight.put("USA")
 
 def on_message(client, userdata, message):
-	print("Message Topic: ", message.topic)
-	print("Message Payload: ", str(message.payload))
-	if message.topic == "traffic/direction":
+	print("Message Topic: " + str(message.topic))
+	print("Message Payload: " + str(message.payload))
+	if str(message.topic) == "traffic/direction":
 		if str(message.payload) == "n":
 			queueN.put(str(message.payload))
 		elif str(message.payload) == "s":
@@ -145,29 +145,30 @@ def on_message(client, userdata, message):
 			queueE.put(str(message.payload))
 		elif str(message.payload) == "w":
 			queueW.put(str(message.payload))
-	elif message.topic == "traffic/lights":
+	elif str(message.topic) == "traffic/lights":
 		if str(message.payload) == "us":
 			usLight.put("USA")
 		elif str(message.payload) == "uk":
 			while not usLight.empty():
 				usLight.get()
-	elif message.topic == "traffic/status":
+	elif str(message.topic) == "traffic/status":
 		if str(message.payload) == "status":
 			# Send message to publisher
-			print(str(queueE.qsize()), " cars waiting from the East")
-			print(str(queueW.qsize()), " cars waiting from the West")
-			print(str(queueN.qsize()), " cars waiting from the North")
-			print(str(queueS.qsize()), " cars waiting from the South")
+			returnString = str(queueE.qsize()) + " cars waiting from the East\n"
+			returnString = returnString + str(queueW.qsize()) + " cars waiting from the West\n"
+			returnString = returnString + str(queueN.qsize()) + " cars waiting from the North\n"
+			returnString = returnString + str(queueS.qsize()) + " cars waiting from the South\n"
 			if GPIO.input(ns_green) == True:
-				print("Green light for North/South")
-				print("Red light for East/West")
+				returnString = returnString + "Green light for North/South\n"
+				returnString = returnString + "Red light for East/West\n"
 			else:
-				print("Green light for East/West")
-				print("Red light for North/South")
+				returnString = returnString + "Green light for East/West\n"
+				returnString = returnString + "Red light for North/South\n"
 			if usLight.empty():
-				print("Light Style: UK")
+				returnString = returnString + "Light Style: UK\n"
 			else:
-				print("Light Style: US")
+				returnString = returnString + "Light Style: US\n"
+			client.publish("traffic/reply", returnString, qos=0, retain=False)
 
 client = mqtt.Client(client_id="Server")
 client.username_pw_set("traffic", password="lights")
@@ -188,16 +189,16 @@ while True:
 	elif not queueE.empty() or not queueW.empty() and GPIO.input(ew_green) == True:
 		timer2 = 0
 		while not queueE.empty() or not queueW.empty() and timer2 != 3:
-			print(str(queueE.qsize()), " cars in queueE")
-			print(str(queueW.qsize()), " cars in queueW")
+			#print(str(queueE.qsize()) + " cars in queueE")
+			#print(str(queueW.qsize()) + " cars in queueW")
 			if not queueE.empty():
 				queueE.get()
 			if not queueW.empty():
 				queueW.get() 
 			time.sleep(1)
 			timer2 += 1
-		print(str(queueE.qsize()), " cars in queueE")
-		print(str(queueW.qsize()), " cars in queueW")
+		#print(str(queueE.qsize()) + " cars in queueE")
+		#print(str(queueW.qsize()) + " cars in queueW")
 		print("Switch Lights")
 		
 		switch_lights()

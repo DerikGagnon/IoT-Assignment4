@@ -2,15 +2,20 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import time
 
+def on_message(client, userdata, message):
+	print("\n" + str(message.payload))
+
 # Setup the client
 client = mqtt.Client(client_id="Client")
+client.on_message = on_message
 
 # Connect to the Broker
 client.connect("127.0.0.1", port = 1883, keepalive=60, bind_address="")
 menu = "n"
 
 while menu.lower() != "q":
-	print("A - Send a car")
+	print("\n\n\n----------  MENU  ----------")
+	print("\nA - Send a car")
 	print("B - Change Lights")
 	print("C - Status Request")
 	print("Q - Quit\n")
@@ -39,6 +44,9 @@ while menu.lower() != "q":
 			client.publish("traffic/lights", "uk", qos=0, retain=False)
 	elif menu.lower() == "c":
 		client.publish("traffic/status", "status", qos=0, retain=False)
+		client.subscribe("traffic/reply", 0)
+		client.loop_start()
+		time.sleep(1)
 
 
 # client = mqtt.Client(client_id="Derik")
